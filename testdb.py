@@ -9,6 +9,7 @@ tables = ['departments', 'jobs', 'employees']
 
 # Query and print records from each table
 for table_name in tables:
+    
     print(f"Records in {table_name}:")
     cursor.execute(f'SELECT * FROM {table_name}')
     rows = cursor.fetchall()
