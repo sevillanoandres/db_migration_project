@@ -19,9 +19,9 @@ def upload_csv():
         df = pd.read_csv(file)
         table_name = request.args.get('table')
         if table_name == 'departments':
-            df.to_sql('departments', con=db.engine, if_exists='append', index=False)
+            df.to_sql('departments', con=db.engine, if_exists='replace', index=False)
         elif table_name == 'jobs':
-            df.to_sql('jobs', con=db.engine, if_exists='append', index=False)
+            df.to_sql('jobs', con=db.engine, if_exists='replace', index=False)
         elif table_name == 'employees':
             df.to_sql('employees', con=db.engine, if_exists='replace', index=False)
         else:
