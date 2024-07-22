@@ -9,6 +9,22 @@ app = Flask(__name__)
 init_db(app)
 
 
+@app.route('/metrics/above_mean_hired', methods=['GET'])
+def above_mean_hired():
+    total_hired = db.session.query(
+        Employee.department_id, func.count(Employee.id).label('hired')
+    ).filter(func.strftime('%Y', Employee.datetime) == '2021').group_by(Employee.department_id).subquery()
+
+    mean_hired = db.session.query(func.avg(total_hired.c.hired)).scalar()
+
+    results = db.session.query(
+        Department.id, Department.name.label('department'), total_hired.c.hired
+    ).join(total_hired, Department.id == total_hired.c.department_id).filter(total_hired.c.hired > mean_hired).order_by(total_hired.c.hired.desc()).all()
+
+    data = [{"id": row.id, "department": row.department, "hired": row.hired} for row in results]
+
+    return jsonify(data)
+
 @app.route('/metrics/hired_per_quarter', methods=['GET'])
 def hired_per_quarter():
     q1 = func.sum(case((func.strftime('%m', Employee.datetime).between('01', '03'), 1), else_=0)).label('Q1')
