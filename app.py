@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify
 from sqlalchemy import func
 from sqlalchemy.sql import case
 from sqlalchemy.sql.expression import func, text
-from models import Department, Job, Employee
 from database import db, init_db
+from models import Department, Job, Employee
 import pandas as pd
 
 app = Flask(__name__)
