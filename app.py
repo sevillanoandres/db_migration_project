@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from sqlalchemy import func
 from sqlalchemy.sql import case
+from sqlalchemy.sql.expression import func, text
 from models import Department, Job, Employee
 from database import db, init_db
 import pandas as pd
@@ -13,7 +14,7 @@ init_db(app)
 def above_mean_hired():
     total_hired = db.session.query(
         Employee.department_id, func.count(Employee.id).label('hired')
-    ).filter(func.strftime('%Y', Employee.datetime) == '2021').group_by(Employee.department_id).subquery()
+    ).filter(func.datepart(text('year'), Employee.datetime) == '2021').group_by(Employee.department_id).subquery()
 
     mean_hired = db.session.query(func.avg(total_hired.c.hired)).scalar()
 
@@ -27,10 +28,10 @@ def above_mean_hired():
 
 @app.route('/metrics/hired_per_quarter', methods=['GET'])
 def hired_per_quarter():
-    q1 = func.sum(case((func.strftime('%m', Employee.datetime).between('01', '03'), 1), else_=0)).label('Q1')
-    q2 = func.sum(case((func.strftime('%m', Employee.datetime).between('04', '06'), 1), else_=0)).label('Q2')
-    q3 = func.sum(case((func.strftime('%m', Employee.datetime).between('07', '09'), 1), else_=0)).label('Q3')
-    q4 = func.sum(case((func.strftime('%m', Employee.datetime).between('10', '12'), 1), else_=0)).label('Q4')
+    q1 = func.sum(case((func.datepart(text('month'), Employee.datetime).between('01', '03'), 1), else_=0)).label('Q1')
+    q2 = func.sum(case((func.datepart(text('month'), Employee.datetime).between('04', '06'), 1), else_=0)).label('Q2')
+    q3 = func.sum(case((func.datepart(text('month'), Employee.datetime).between('07', '09'), 1), else_=0)).label('Q3')
+    q4 = func.sum(case((func.datepart(text('month'), Employee.datetime).between('10', '12'), 1), else_=0)).label('Q4')
 
     results = db.session.query(
         Department.name.label('department'),
@@ -40,7 +41,7 @@ def hired_per_quarter():
         q3,
         q4
     ).join(Department, Employee.department_id == Department.id).join(Job, Employee.job_id == Job.id).filter(
-        func.strftime('%Y', Employee.datetime) == '2021'
+        func.datepart(text('year'), Employee.datetime) == '2021'
     ).group_by(Department.name, Job.job).order_by(Department.name, Job.job).all()
 
     data = [{"department": row.department, "job": row.job, "Q1": row.Q1, "Q2": row.Q2, "Q3": row.Q3, "Q4": row.Q4} for row in results]
