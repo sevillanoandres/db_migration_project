@@ -1,11 +1,11 @@
 import sqlite3
 
 # Connect to the SQLite database
-conn = sqlite3.connect('migration.db')
+conn = sqlite3.connect('apichallenge.db')
 cursor = conn.cursor()
 
 # Define table names
-tables = ['departments', 'jobs', 'employees']
+tables = ['dbo.departments', 'jobs', 'employees']
 
 # Query and print records from each table
 for table_name in tables:

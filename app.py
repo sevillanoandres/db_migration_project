@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from pythonAPI.models import Department, Job, Employee
-from pythonAPI.database import db, init_db
+from models import Department, Job, Employee
+from database import db, init_db
 import pandas as pd
 
 app = Flask(__name__)
@@ -23,7 +23,7 @@ def upload_csv():
         elif table_name == 'jobs':
             df.to_sql('jobs', con=db.engine, if_exists='append', index=False)
         elif table_name == 'employees':
-            df.to_sql('employees', con=db.engine, if_exists='append', index=False)
+            df.to_sql('employees', con=db.engine, if_exists='replace', index=False)
         else:
             return 'Invalid table name', 400
 
